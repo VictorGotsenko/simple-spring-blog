@@ -37,6 +37,9 @@ public class PostsController {
         Optional<Post> post = Application.getPosts().stream()
                 .filter(p -> p.getTitle().equals(id))
                 .findFirst();
+        if (post.isEmpty()) {
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.of(post);
     }
 
@@ -81,9 +84,10 @@ http post localhost:8080/posts title=title01 author=author03
 
     // http delete localhost:8080/posts/title02
     @DeleteMapping("/posts/{id}") // Удаление поста
-    public void destroy(@PathVariable String id) {
+    public ResponseEntity<Void> destroy(@PathVariable String id) {
         List<Post> posts = Application.getPosts();
         posts.removeIf(p -> p.getTitle().equals(id));
         Application.setPosts(posts);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
