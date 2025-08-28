@@ -23,9 +23,6 @@ public class Application {
     @Getter
     private static List<User> users= new ArrayList<>();
 
-
-
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

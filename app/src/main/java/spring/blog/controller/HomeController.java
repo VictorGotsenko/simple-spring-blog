@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
     @GetMapping("/")
     public String home() {
-        return "Добро пожаловать в Simple Spring Blog!";
+        return "Main page Simple Spring Blog!";
     }
 
     //у блога есть отдельная страница «О проекте». less 03

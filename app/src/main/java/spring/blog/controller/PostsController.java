@@ -1,5 +1,6 @@
 package spring.blog.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,12 +23,15 @@ import java.util.Optional;
 @RequestMapping("/api")
 public class PostsController {
 
+    @Value("${app.page-size}")
+    int postsPerPage;
+
     // http get localhost:8080/posts
     // http get localhost:8080/api/posts
     @GetMapping("/posts")
-    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
+    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10" ) Integer postsPerPage) {
         var result = Application.getPosts()
-                .stream().limit(limit).toList();
+                .stream().limit(postsPerPage).toList();
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(Application.getPosts().size()))
                 .body(result);
