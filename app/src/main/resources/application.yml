@@ -1,20 +1,30 @@
 spring:
-    jpa:
-        show-sql: true       # вывод SQL-запросов
-#    main:
-#        banner-mode: "off"
-    output:
-        ansi:
-            enabled: always    # цветной вывод логотипа
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true       # вывод SQL-запросов
+  main:
+    banner-mode: "off"   # Banner off
+  output:
+    ansi:
+      enabled: always    # цветной вывод логотипа
 
 # В application.yml
 logging:
-    pattern:
-        dateformat: "yyyy-MM-dd HH:mm:ss"  # кастомный формат даты в логах
-    console:
-        color-enabled: true
+  pattern:
+    dateformat: "yyyy-MM-dd HH:mm:ss"  # кастомный формат даты в логах
+  console:
+    color-enabled: true
 
 app:
-    welcome-message: "Welcome to Spring blog!"  # наше кастомное сообщение
-    admin-email: admin-email@gmail.com
-    page-size: 8
+  welcome-message: "Welcome to Spring blog!"  # наше кастомное сообщение
+  admin-email: admin-email@gmail.com
+  page-size: 8
