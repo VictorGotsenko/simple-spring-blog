@@ -12,6 +12,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import static jakarta.persistence.GenerationType.AUTO;
+
 @Entity
 @Table(name = "users")
 @Setter
@@ -21,7 +23,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false)
     private String email;
     private String firstName;
