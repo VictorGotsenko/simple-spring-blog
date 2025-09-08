@@ -20,6 +20,7 @@ import spring.blog.exception.ResourceNotFoundException;
 import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -67,16 +68,25 @@ http post localhost:8080/api/posts title=title01 content=somecontent02
     @PostMapping("/posts")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Post> createPost(@Valid @RequestBody Post post) {
-    Post saved = postRepository.save(post);
-    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-}
+        Post saved = postRepository.save(post);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
     // http put localhost:8080/posts/title01 title=title01Up content=somecontentUpdate author=author01
     // http put localhost:8080/api/posts/title01 title=title01Up content=somecontentUpdate author=author01
 //    http put localhost:8080/api/posts/2 title=title011 content=somecontent0555
     @PutMapping("/posts/{id}") // Обновление поста
     @ResponseStatus(HttpStatus.OK)
-    public Post update(@Valid @NotBlank @PathVariable Long id, @RequestBody Post data) {
+//    public Post update(@Valid @NotBlank @PathVariable Long id, @RequestBody Post data) {
+    public Post update(@Valid @PathVariable Long id, @RequestBody Post data) {
+        List<Post> posts = postRepository.findAll();
+        for (final Post post : posts) {
+            if (data.equals(post)) {
+                throw new ResourceNotFoundException("Post with id:" + id + " Not Found");
+            }
+        }
+
+
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id:" + id + " Not Found"));
         post.setTitle(data.getTitle());

@@ -21,8 +21,8 @@ spring:
 logging:
   pattern:
     dateformat: "yyyy-MM-dd HH:mm:ss"  # кастомный формат даты в логах
-  console:
-    color-enabled: true
+  #console:
+  #  color-enabled: true
 
 app:
   welcome-message: "Welcome to Spring blog!"  # наше кастомное сообщение

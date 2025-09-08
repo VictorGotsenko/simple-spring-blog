@@ -63,7 +63,7 @@ public class UserController {
     //http put localhost:8080/api/users/2 firstName=Chuk lastName=Gai email=chuk@mail.io birthday=2000-01-01
     @PutMapping("/users/{id}") // Обновление
     @ResponseStatus(HttpStatus.OK)
-    public User updateUser(@Valid @NotBlank @PathVariable Long id, @RequestBody User data) {
+    public User updateUser(@Valid @PathVariable Long id, @RequestBody User data) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id:" + id + " - Not Found"));
         user.setFirstName(data.getFirstName());
