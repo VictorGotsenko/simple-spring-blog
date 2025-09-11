@@ -1,8 +1,6 @@
 package spring.blog.controller;
 
-
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,10 +47,10 @@ public class UserController {
 
     // http post localhost:8080/api/users id=1 name=Chuk email=chuk@mail.io
     // http post localhost:8080/api/users id=2 name=Gek email=gek@mail.io
-//    @PostMapping("/users") // Создание
+    //    @PostMapping("/users") // Создание
     // http post localhost:8080/api/users firstName=Chuk lastName=Gai email=chuk@mail.io birthday=2000-01-10
     // http post localhost:8080/api/users firstName=Alise lastName=Fox email=alise@mail.io birthday=2001-01-10
-//    http post localhost:8080/api/users firstName=Chuk lastName=Gai birthday=2000-01-01 email=chuk@mail.io
+    // http post localhost:8080/api/users firstName=Chuk lastName=Gai birthday=2000-01-01 email=chuk@mail.io
     @PostMapping("/users")
     public ResponseEntity<User> create(@RequestBody User user) {
         User saved = userRepository.save(user);
