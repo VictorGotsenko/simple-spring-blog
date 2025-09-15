@@ -26,9 +26,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class UserController {
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+//    @Autowired
+//    private UserRepository userRepository;
 
     // http get localhost:8080/api/users
     @GetMapping("/users")
