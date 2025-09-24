@@ -34,6 +34,8 @@ public class Post {
     private String content;
     private boolean published;
 
+    private Long userId;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

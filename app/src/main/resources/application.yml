@@ -28,3 +28,4 @@ app:
   welcome-message: "Welcome to Spring blog!"  # наше кастомное сообщение
   admin-email: admin-email@gmail.com
   page-size: 8
+  fixedTime: "2025-08-08T23:00"

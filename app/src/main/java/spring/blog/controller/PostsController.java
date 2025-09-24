@@ -1,8 +1,6 @@
 package spring.blog.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -32,14 +30,27 @@ import java.util.List;
 @RequestMapping("/api")
 public class PostsController {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+
+    public PostsController(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     @Value("${app.page-size}")
     int postsPerPage;
 
     // curl -X GET 'http://localhost:8080/api/test?param1=1&param2=2'
     // строку передавать - кавычки
+
+    /**
+     * Это функция GET.
+     *
+     * @param param1 test1
+     * @param param2 test2
+     * @return the name of the object
+     * @author Имя автора
+     * @version 1.0
+     */
     @GetMapping("/test")
     public String getRequestParam(
             @RequestParam(name = "param1") Integer param1,
@@ -47,6 +58,15 @@ public class PostsController {
         return "param1:" + param1 + " param2:" + param2 + "\n";
     }
 
+
+    /**
+     * Это функция GET.
+     *
+     * @param page      page
+     * @param size      size
+     * @param sortParam sortParam
+     * @return the name of the Page<Post>
+     */
     // http get localhost:8080/api/posts?page=0&size=3
     // curl GET 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
     // http get 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
@@ -62,14 +82,20 @@ public class PostsController {
         return postRepository.findByPublishedTrue(pageable);
     }
 
+
+    /**
+     * Это функция GET id.
+     *
+     * @param id id
+     * @return the name of the Post
+     */
     // {id} - title
     // http get localhost:8080/api/posts/1
     @GetMapping("/posts/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Post show(@PathVariable Long id) {
-        var post = postRepository.findById(id)
+        return postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id:" + id + " Not Found"));
-        return post;
     }
 
     /* Это создание страницы — здесь возвращается информация о добавленной странице
@@ -85,6 +111,13 @@ http post localhost:8080/api/posts title=title09 content=somecontent author=auth
 http post localhost:8080/api/posts title=title10 content=somecontent author=author03 published=true
 
      */
+
+    /**
+     * Это функция POST Create.
+     *
+     * @param post data
+     * @return the name of the Post
+     */
     @PostMapping("/posts")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Post> createPost(@Valid @RequestBody Post post) {
@@ -92,6 +125,13 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Это функция PUT.
+     *
+     * @param id id
+     * @param data data
+     * @return the name of the Post
+     */
     //  http put localhost:8080/api/posts/2 title=title011 content=somecontent0555
     @PutMapping("/posts/{id}") // Обновление поста
     @ResponseStatus(HttpStatus.OK)
@@ -112,10 +152,15 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
         return post;
     }
 
+    /**
+     * Это функция DELETE.
+     *
+     * @param id id
+     */
     // http delete localhost:8080/api/posts/2
     @DeleteMapping("/posts/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@NotBlank @PathVariable Long id) {
+    public void deleteById(@PathVariable Long id) {
         postRepository.deleteById(id);
     }
 }
