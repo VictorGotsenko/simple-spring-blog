@@ -140,8 +140,7 @@ public class UserControllerTest {
         userRepository.save(user);
 
         mockMvc.perform(delete("/api/users/" + user.getId()))
-                .andExpect(status()
-                .isNoContent());
+                .andExpect(status().isNoContent());
 
     }
 

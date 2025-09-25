@@ -2,13 +2,9 @@ package spring.blog.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +15,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import spring.blog.dto.PostDTO;
 import spring.blog.exception.ResourceNotFoundException;
+import spring.blog.mapper.PostMapper;
 import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
 
@@ -27,13 +25,15 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/posts")
 public class PostsController {
 
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
-    public PostsController(PostRepository postRepository) {
+    public PostsController(PostRepository postRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     @Value("${app.page-size}")
@@ -62,25 +62,28 @@ public class PostsController {
     /**
      * Это функция GET.
      *
-     * @param page      page
-     * @param size      size
-     * @param sortParam sortParam
      * @return the name of the Page<Post>
      */
     // http get localhost:8080/api/posts?page=0&size=3
     // curl GET 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
     // http get 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
-    @GetMapping("/posts")
-    @ResponseStatus(HttpStatus.OK)
-    public Page<Post> getPublishedPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sortParam) {
-
-        Sort sort = Sort.by(Sort.Direction.fromString(sortParam.split(",")[1]), sortParam.split(",")[0]);
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return postRepository.findByPublishedTrue(pageable);
+    @GetMapping("")
+    public List<PostDTO> listPosts() {
+        return postRepository.findAll()
+                .stream()
+                .map(postMapper::toDTO)
+                .toList();
     }
+//    @ResponseStatus(HttpStatus.OK)
+//    public Page<Post> getPublishedPosts(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam(defaultValue = "createdAt,desc") String sortParam) {
+//
+//        Sort sort = Sort.by(Sort.Direction.fromString(sortParam.split(",")[1]), sortParam.split(",")[0]);
+//        Pageable pageable = PageRequest.of(page, size, sort);
+//        return postRepository.findByPublishedTrue(pageable);
+//    }
 
 
     /**
@@ -91,11 +94,11 @@ public class PostsController {
      */
     // {id} - title
     // http get localhost:8080/api/posts/1
-    @GetMapping("/posts/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Post show(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
         return postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post with id:" + id + " Not Found"));
+                .map(post -> ResponseEntity.ok(postMapper.toDTO(post)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /* Это создание страницы — здесь возвращается информация о добавленной странице
@@ -118,7 +121,7 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
      * @param post data
      * @return the name of the Post
      */
-    @PostMapping("/posts")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Post> createPost(@Valid @RequestBody Post post) {
         Post saved = postRepository.save(post);
@@ -128,12 +131,12 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
     /**
      * Это функция PUT.
      *
-     * @param id id
+     * @param id   id
      * @param data data
      * @return the name of the Post
      */
     //  http put localhost:8080/api/posts/2 title=title011 content=somecontent0555
-    @PutMapping("/posts/{id}") // Обновление поста
+    @PutMapping("/{id}") // Обновление поста
     @ResponseStatus(HttpStatus.OK)
     public Post update(@Valid @PathVariable Long id, @RequestBody Post data) {
         List<Post> posts = postRepository.findAll();
@@ -158,7 +161,7 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
      * @param id id
      */
     // http delete localhost:8080/api/posts/2
-    @DeleteMapping("/posts/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
         postRepository.deleteById(id);

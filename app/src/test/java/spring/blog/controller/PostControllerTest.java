@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 @SpringBootTest
@@ -71,11 +70,17 @@ class PostControllerTest {
     // получение списка
     @Test
     void testIndex() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                        .param("page", "0")
-                        .param("size", "5"))
+//        mockMvc.perform(get("/api/posts"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray());
+
+        var result = mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
+                .andReturn();
+
+        // Тело это строка, в этом случае JSON
+        var body = result.getResponse().getContentAsString();
+        assertThatJson(body).isArray();
     }
 
     //получение по id,

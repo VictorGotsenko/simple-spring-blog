@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import spring.blog.dto.UserDTO;
 import spring.blog.exception.ResourceNotFoundException;
+import spring.blog.mapper.UserMapper;
 import spring.blog.model.User;
 import spring.blog.repository.UserRepository;
 
@@ -26,9 +28,11 @@ import java.util.List;
 @RequestMapping("/api")
 public class UserController {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    UserController(UserRepository userRepository) {
+    UserController(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -40,8 +44,11 @@ public class UserController {
     // http get localhost:8080/api/users
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> indexUsers(@RequestParam(defaultValue = "10") Integer limit) {
-        return userRepository.findAll();
+    public List<UserDTO> indexUsers(@RequestParam(defaultValue = "10") Integer limit) {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toDTO)
+                .toList();
     }
 
     /**
@@ -53,8 +60,9 @@ public class UserController {
     // http get localhost:8080/api/users/1
     @GetMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public User show(@PathVariable Long id) {
+    public UserDTO show(@PathVariable Long id) {
         return userRepository.findById(id)
+                .map(user -> userMapper.toDTO(user))
                 .orElseThrow(() -> new ResourceNotFoundException("User with id:" + id + " - Not Found"));
     }
 
@@ -83,7 +91,7 @@ public class UserController {
     /**
      * Это функция PUT.
      *
-     * @param id id
+     * @param id   id
      * @param data data
      * @return user
      */
@@ -101,6 +109,7 @@ public class UserController {
     }
 
     // http delete localhost:8080/api/users/2
+
     /**
      * Это функция DELETE.
      *
