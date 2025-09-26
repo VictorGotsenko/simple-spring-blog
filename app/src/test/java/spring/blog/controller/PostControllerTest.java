@@ -118,7 +118,7 @@ class PostControllerTest {
 
         var data = new HashMap<>();
         data.put("title", "MyTitle");
-        data.put("content", "Mycontent");
+        data.put("content", "Mycontent123456789");
 
         var request = put("/api/posts/" + post.getId())
                 .contentType(MediaType.APPLICATION_JSON)
