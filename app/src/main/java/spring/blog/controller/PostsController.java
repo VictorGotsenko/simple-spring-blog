@@ -23,7 +23,6 @@ import spring.blog.mapper.PostMapper;
 import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -115,6 +114,8 @@ http post localhost:8080/api/posts title=title07 content=somecontent author=auth
 http post localhost:8080/api/posts title=title08 content=somecontent author=author02 published=true
 http post localhost:8080/api/posts title=title09 content=somecontent author=author02 published=true
 http post localhost:8080/api/posts title=title10 content=somecontent author=author03 published=true
+http post localhost:8080/api/posts title=title01 content=somecontent published=false userId=1
+http post localhost:8080/api/posts title=title01 content=somecontent123456789  published=true
 
      */
 
@@ -125,25 +126,11 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
      * @return the name of the Post
      */
     @PostMapping("")
-    public ResponseEntity<PostDTO> createPost(@Valid @RequestBody PostCreateDTO dto) {
-        var post = new Post();
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setPublished(true);
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUpdatedAt(LocalDateTime.now());
-
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
+        Post post = postMapper.toEntity(dto);
         postRepository.save(post);
-
-        var response = new PostDTO();
-        response.setId(post.getId());
-        response.setTitle(post.getTitle());
-        response.setContent(post.getContent());
-        response.setPublished(post.isPublished());
-        response.setCreatedAt(post.getCreatedAt());
-        response.setUpdatedAt(post.getUpdatedAt());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//        return ResponseEntity.ok(postMapper.toDTO(post));
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(post));
     }
 
     /**
@@ -155,28 +142,15 @@ http post localhost:8080/api/posts title=title10 content=somecontent author=auth
      */
     //  http put localhost:8080/api/posts/2 title=title011 content=somecontent0555
     @PutMapping("/{id}") // Обновление поста
-    public ResponseEntity<PostDTO> updatePost(
-            @PathVariable Long id,
-            @Valid @RequestBody PostUpdateDTO dto) {
-
-        var post = postRepository.findById(id)
+    public ResponseEntity<PostDTO> update(@PathVariable Long id,
+                                          @Valid @RequestBody PostUpdateDTO dto) {
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setUpdatedAt(LocalDateTime.now());
-
+        postMapper.updateEntityFromDTO(dto, post);
         postRepository.save(post);
 
-        var response = new PostDTO();
-        response.setId(post.getId());
-        response.setTitle(post.getTitle());
-        response.setContent(post.getContent());
-        response.setPublished(post.isPublished());
-        response.setCreatedAt(post.getCreatedAt());
-        response.setUpdatedAt(post.getUpdatedAt());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(postMapper.toDTO(post));
     }
 
     /**

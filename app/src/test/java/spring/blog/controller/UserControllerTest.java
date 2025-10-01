@@ -54,6 +54,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
+//                .andExpect(status().isOk())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.email").value("john@example.com"));
@@ -110,6 +111,7 @@ public class UserControllerTest {
 
         var data = new HashMap<>();
         data.put("firstName", "Mike");
+        data.put("lastName", "Gai");
         data.put("email", user.getEmail());
 
 

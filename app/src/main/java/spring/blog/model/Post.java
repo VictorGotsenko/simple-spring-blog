@@ -28,10 +28,12 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String title;
 
     @NotBlank
     private String content;
+
     private boolean published;
 
     private Long userId;
@@ -42,6 +44,5 @@ public class Post {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
 
 }

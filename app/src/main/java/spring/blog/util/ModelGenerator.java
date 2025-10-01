@@ -44,7 +44,7 @@ public class ModelGenerator {
 
             Post post = new Post();
             post.setTitle(faker.book().title());
-            post.setContent(faker.lorem().sentence(1));
+            post.setContent(faker.lorem().sentence());
             post.setPublished(faker.bool().bool());
             post.setUserId(user.getId());
             postRepository.save(post);

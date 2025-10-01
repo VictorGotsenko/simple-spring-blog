@@ -1,6 +1,7 @@
 package spring.blog.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import spring.blog.dto.UserCreateDTO;
 import spring.blog.dto.UserDTO;
+import spring.blog.dto.UserUpdateDTO;
 import spring.blog.exception.ResourceNotFoundException;
 import spring.blog.mapper.UserMapper;
 import spring.blog.model.User;
@@ -26,15 +29,16 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
+/*
     UserController(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
-
+*/
     /**
      * Это функция GET.
      *
@@ -76,13 +80,15 @@ public class UserController {
     /**
      * Это функция POST Create.
      *
-     * @param user user
+     * @param dto user
      * @return created user
      */
     @PostMapping("/users")
-    public ResponseEntity<User> create(@RequestBody User user) {
-        User saved = userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserCreateDTO dto) {
+        User user = userMapper.toEntity(dto);
+        userRepository.save(user);
+//        return ResponseEntity.ok(userMapper.toDTO(user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(user));
     }
 
     // http put localhost:8080/api/users/1 name=Bob email=bob@hotmail.io
@@ -92,20 +98,19 @@ public class UserController {
      * Это функция PUT.
      *
      * @param id   id
-     * @param data data
-     * @return user
+     * @param dto data
+     * @return userDTO
      */
     @PutMapping("/users/{id}") // Обновление
-    @ResponseStatus(HttpStatus.OK)
-    public User updateUser(@Valid @PathVariable Long id, @RequestBody User data) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id,
+                                            @Valid @RequestBody UserUpdateDTO dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id:" + id + " - Not Found"));
-        user.setFirstName(data.getFirstName());
-        user.setLastName(data.getLastName());
-        user.setEmail(data.getEmail());
-        user.setBirthday(data.getBirthday());
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+
+        userMapper.updateEntityFromDTO(dto, user);
         userRepository.save(user);
-        return user;
+
+        return ResponseEntity.ok(userMapper.toDTO(user));
     }
 
     // http delete localhost:8080/api/users/2

@@ -52,7 +52,9 @@ class PostControllerTest {
         var data = new HashMap<>();
         data.put("title", faker.book().title());
         data.put("content", faker.lorem().sentence(1));
-        data.put("userId", faker.random().nextInt(5));
+        data.put("published", false);
+
+//        data.put("userId", faker.random().nextInt(5));
 
         var request = post("/api/posts") //posts"
                 .contentType(MediaType.APPLICATION_JSON)
@@ -60,6 +62,7 @@ class PostControllerTest {
                 .content(om.writeValueAsString(data));
 
         var result = mockMvc.perform(request)
+//                .andExpect(status().isOk())
                 .andExpect(status().isCreated())
                 .andReturn(); //CREATED
 

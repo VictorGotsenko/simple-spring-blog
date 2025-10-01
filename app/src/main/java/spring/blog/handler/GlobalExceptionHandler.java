@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Это функция handleValidation.
+     * Это функция handleValidationErrors.
      *
      * @param ex Exception
      * @return body(errors) Message
