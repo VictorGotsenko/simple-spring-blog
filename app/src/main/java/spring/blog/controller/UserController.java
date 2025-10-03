@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
 import spring.blog.dto.UserCreateDTO;
 import spring.blog.dto.UserDTO;
+import spring.blog.dto.UserPatchDTO;
 import spring.blog.dto.UserUpdateDTO;
 import spring.blog.exception.ResourceNotFoundException;
 import spring.blog.mapper.UserMapper;
@@ -39,6 +42,7 @@ public class UserController {
         this.userMapper = userMapper;
     }
 */
+
     /**
      * Это функция GET.
      *
@@ -97,19 +101,39 @@ public class UserController {
     /**
      * Это функция PUT.
      *
-     * @param id   id
+     * @param id  id
      * @param dto data
      * @return userDTO
      */
     @PutMapping("/users/{id}") // Обновление
     public ResponseEntity<UserDTO> update(@PathVariable Long id,
-                                            @Valid @RequestBody UserUpdateDTO dto) {
+                                          @Valid @RequestBody UserUpdateDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
 
         userMapper.updateEntityFromDTO(dto, user);
         userRepository.save(user);
 
+        return ResponseEntity.ok(userMapper.toDTO(user));
+    }
+
+    /**
+     *
+     * @param id id
+     * @param dto UserDto
+     * @return
+     */
+    @PatchMapping("/users/{id}")
+    public ResponseEntity<UserDTO> patchUser(@PathVariable Long id,
+                                             @RequestBody UserPatchDTO dto) {
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        dto.getFirstName().ifPresent(user::setFirstName);
+        dto.getLastName().ifPresent(user::setLastName);
+        dto.getEmail().ifPresent(user::setEmail);
+
+        userRepository.save(user);
         return ResponseEntity.ok(userMapper.toDTO(user));
     }
 

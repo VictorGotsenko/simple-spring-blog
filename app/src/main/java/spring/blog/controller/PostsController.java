@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import spring.blog.dto.PostCreateDTO;
 import spring.blog.dto.PostDTO;
+import spring.blog.dto.PostPatchDTO;
 import spring.blog.dto.PostUpdateDTO;
 import spring.blog.mapper.PostMapper;
 import spring.blog.model.Post;
@@ -150,6 +152,25 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
         postMapper.updateEntityFromDTO(dto, post);
         postRepository.save(post);
 
+        return ResponseEntity.ok(postMapper.toDTO(post));
+    }
+
+    /**
+     * @param id  id
+     * @param dto PostDTO
+     * @return
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<PostDTO> patchPost(@PathVariable Long id,
+                                             @RequestBody PostPatchDTO dto) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        dto.getTitle().ifPresent(post::setTitle);
+        dto.getContent().ifPresent(post::setContent);
+        dto.getPublished().ifPresent(post::setPublished);
+
+        postRepository.save(post);
         return ResponseEntity.ok(postMapper.toDTO(post));
     }
 
