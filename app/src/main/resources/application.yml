@@ -11,6 +11,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true       # вывод SQL-запросов
+    generate-ddl: true   # создает и выполняет эти запросы автоматически «Один ко многим» (OneToMany или O2M).
   main:
     banner-mode: "off"   # Banner off
   output:

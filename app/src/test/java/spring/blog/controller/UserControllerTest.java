@@ -83,6 +83,8 @@ public class UserControllerTest {
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .ignore(Select.field(User::getPosts))
                 .create();
 
         userRepository.save(user);
@@ -106,6 +108,8 @@ public class UserControllerTest {
         var user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .ignore(Select.field(User::getPosts))
                 .create();
         userRepository.save(user);
 
@@ -137,6 +141,8 @@ public class UserControllerTest {
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .ignore(Select.field(User::getPosts))
                 .create();
 
         userRepository.save(user);

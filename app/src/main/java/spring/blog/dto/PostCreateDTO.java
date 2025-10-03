@@ -21,4 +21,6 @@ public class PostCreateDTO {
     @Getter
     private boolean published;
 
+    private Long authorId; // ссылка на владельца
+
 }

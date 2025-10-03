@@ -46,11 +46,11 @@ public class ModelGenerator {
             post.setTitle(faker.book().title());
             post.setContent(faker.lorem().sentence());
             post.setPublished(faker.bool().bool());
-            post.setUserId(user.getId());
+            post.setAuthor(user);
             postRepository.save(post);
             System.out.println("Id: " + post.getId());
             System.out.println("Title: " + post.getTitle());
-            System.out.println("User Id: " + post.getUserId());
+            System.out.println("User Id: " + post.getAuthor().getId());
             System.out.println("Content: " + post.getContent());
             System.out.println("CreatetAt: " + post.getCreatedAt());
         }

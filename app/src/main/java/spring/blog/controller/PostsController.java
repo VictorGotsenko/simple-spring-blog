@@ -24,6 +24,7 @@ import spring.blog.dto.PostUpdateDTO;
 import spring.blog.mapper.PostMapper;
 import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
+import spring.blog.repository.UserRepository;
 
 import java.util.List;
 
@@ -33,10 +34,14 @@ import java.util.List;
 public class PostsController {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostMapper postMapper;
 
-    public PostsController(PostRepository postRepository, PostMapper postMapper) {
+    public PostsController(PostRepository postRepository,
+                           UserRepository userRepository,
+                           PostMapper postMapper) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
         this.postMapper = postMapper;
     }
 
@@ -107,7 +112,7 @@ public class PostsController {
 
     /* Это создание страницы — здесь возвращается информация о добавленной странице
 
-http post localhost:8080/api/posts title=title01 content=somecontent author=author01 published=true
+http post localhost:8080/api/posts title=title01 content=somecontent userId=1 published=true
 http post localhost:8080/api/posts title=title011 content=somecontent author=author02 published=true
 http post localhost:8080/api/posts title=title03 content=somecontent author=author01 published=false
 http post localhost:8080/api/posts title=title04 content=somecontent author=author05 published=true
@@ -129,7 +134,12 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
      */
     @PostMapping("")
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
+        var user = userRepository.findById(dto.getAuthorId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
         Post post = postMapper.toEntity(dto);
+        post.setAuthor(user);
+        int i = 1;
         postRepository.save(post);
 //        return ResponseEntity.ok(postMapper.toDTO(post));
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(post));
@@ -155,10 +165,12 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
         return ResponseEntity.ok(postMapper.toDTO(post));
     }
 
+
     /**
-     * @param id  id
-     * @param dto PostDTO
-     * @return
+     *
+     * @param id
+     * @param dto
+     * @return ResponseEntity ResponseEntity
      */
     @PatchMapping("/{id}")
     public ResponseEntity<PostDTO> patchPost(@PathVariable Long id,

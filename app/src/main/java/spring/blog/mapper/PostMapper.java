@@ -1,8 +1,10 @@
 package spring.blog.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import spring.blog.dto.PostCreateDTO;
@@ -30,8 +32,24 @@ import spring.blog.model.Post;
 
 public abstract class PostMapper {
     public abstract Post toEntity(PostCreateDTO dto);
+
+    @Mapping(target = "authorId", source = "post", qualifiedByName = "userGetId")
     public abstract PostDTO toDTO(Post post);
+
     public abstract void updateEntityFromDTO(PostUpdateDTO dto, @MappingTarget Post model);
+
+    /**
+     *
+     * @param post
+     * @return userId userId
+     */
+    @Named("userGetId")
+    public Long userGetId(Post post) {
+        //add your custom mapping implementation
+        return post.getAuthor().getId();
+    }
+
+
 }
 
 

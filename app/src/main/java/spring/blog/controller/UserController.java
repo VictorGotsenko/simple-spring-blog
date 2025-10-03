@@ -119,9 +119,9 @@ public class UserController {
 
     /**
      *
-     * @param id id
-     * @param dto UserDto
-     * @return
+     * @param id
+     * @param dto
+     * @return ResponseEntity ResponseEntity
      */
     @PatchMapping("/users/{id}")
     public ResponseEntity<UserDTO> patchUser(@PathVariable Long id,
