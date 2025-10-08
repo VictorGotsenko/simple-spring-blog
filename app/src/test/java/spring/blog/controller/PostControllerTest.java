@@ -50,19 +50,25 @@ class PostControllerTest {
     @Autowired
     private ObjectMapper om;
 
-    private User user;
+    private User testUser;
+    private Post testPost;
 
 
     @BeforeEach
     public void setUp() {
-        var user = Instancio.of(User.class)
+        testUser = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(User::getLastName), () -> faker.name().lastName())
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .ignore(Select.field(User::getPosts))
                 .create();
-        userRepository.save(user);
+        userRepository.save(testUser);
+
+        testPost = new Post();
+        testPost.setTitle(faker.book().title());
+        testPost.setContent(faker.lorem().sentence(1));
+        testPost.setAuthor(testUser);
     }
 
     // создание
@@ -70,22 +76,12 @@ class PostControllerTest {
     @Test
     public void testCreatePost() throws Exception {
 
-        var user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .ignore(Select.field(User::getPosts))
-                .create();
-        userRepository.save(user);
-
         var data = new HashMap<>();
         data.put("title", faker.book().title());
         data.put("content", faker.lorem().sentence(1));
         data.put("published", false);
-        data.put("authorId", user.getId());
+        data.put("authorId", testUser.getId());
 
-//        data.put("userId", faker.random().nextInt(5));
 
         var request = post("/api/posts") //posts"
                 .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +89,6 @@ class PostControllerTest {
                 .content(om.writeValueAsString(data));
 
         var result = mockMvc.perform(request)
-//                .andExpect(status().isOk())
                 .andExpect(status().isCreated())
                 .andReturn(); //CREATED
 
@@ -120,60 +115,32 @@ class PostControllerTest {
     //получение по id,
     @Test
     void testFindById() throws Exception {
-        var user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .ignore(Select.field(User::getPosts))
-                .create();
-        userRepository.save(user);
 
-        var post = Instancio.of(Post.class)
-                .ignore(Select.field(Post::getId))
-                .supply(Select.field(Post::getTitle), () -> faker.book().title())
-                .supply(Select.field(Post::getContent), () -> faker.lorem().sentence(1))
-                .supply(Select.field(Post::getAuthor), () -> user)
-                .create();
+        userRepository.save(testUser);
+        postRepository.save(testPost);
 
-
-        postRepository.save(post);
-
-        var result = mockMvc.perform(get("/api/posts/" + post.getId()))
+        var result = mockMvc.perform(get("/api/posts/" + testPost.getId()))
                 .andExpect(status().isOk())
                 .andReturn(); //Find
 
         var body = result.getResponse().getContentAsString();
-        assertThatJson(body).node("title").isEqualTo(post.getTitle());
+        assertThatJson(body).node("title").isEqualTo(testPost.getTitle());
     }
 
     // обновление,
     @Test
     public void testUpdate() throws Exception {
 
-        var user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .ignore(Select.field(User::getPosts))
-                .create();
-        userRepository.save(user);
-
-        var post = Instancio.of(Post.class)
-                .ignore(Select.field(Post::getId))
-                .supply(Select.field(Post::getTitle), () -> faker.book().title())
-                .supply(Select.field(Post::getContent), () -> faker.lorem().sentence(1))
-                .supply(Select.field(Post::getAuthor), () -> user)
-                .create();
-
-        postRepository.save(post);
+        postRepository.save(testPost);
 
         var data = new HashMap<>();
         data.put("title", "MyTitle");
         data.put("content", "Mycontent123456789");
+        data.put("published", testPost.isPublished());
+        data.put("authorId", testPost.getAuthor().getId());
 
-        var request = put("/api/posts/" + post.getId())
+
+        var request = put("/api/posts/" + testPost.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 // ObjectMapper конвертирует Map в JSON
                 .content(om.writeValueAsString(data));
@@ -181,33 +148,15 @@ class PostControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk());
 
-        post = postRepository.findById(post.getId()).get();
-        assertThat(post.getTitle()).isEqualTo(("MyTitle"));
+        testPost = postRepository.findById(testPost.getId()).get();
+        assertThat(testPost.getTitle()).isEqualTo(("MyTitle"));
     }
 
     // удаление.
     @Test
     public void testDeleteById() throws Exception {
-        var user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .ignore(Select.field(User::getPosts))
-                .create();
-        userRepository.save(user);
-
-        var post = Instancio.of(Post.class)
-                .ignore(Select.field(Post::getId))
-                .supply(Select.field(Post::getTitle), () -> faker.book().title())
-                .supply(Select.field(Post::getContent), () -> faker.lorem().sentence(1))
-                .supply(Select.field(Post::isPublished), () -> false)
-                .supply(Select.field(Post::getAuthor), () -> user)
-                .create();
-
-        postRepository.save(post);
-
-        mockMvc.perform(delete("/api/posts/" + post.getId()))
+        postRepository.save(testPost);
+        mockMvc.perform(delete("/api/posts/" + testPost.getId()))
                 .andExpect(status().isNoContent());
     }
 }

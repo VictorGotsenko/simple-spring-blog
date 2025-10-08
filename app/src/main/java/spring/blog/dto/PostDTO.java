@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
@@ -15,6 +16,7 @@ public class PostDTO {
     private String content;
     private boolean published;
     private Long authorId; // ссылка на владельца
+    private List<String> tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

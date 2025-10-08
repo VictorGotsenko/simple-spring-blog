@@ -2,6 +2,9 @@ package spring.blog.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import spring.blog.model.Tag;
+
+import java.util.List;
 
 
 public class PostUpdateDTO {
@@ -13,6 +16,42 @@ public class PostUpdateDTO {
     @NotBlank
     @Size(min = 10, max = 1000)
     private String content;
+
+    private Long authorId; // ссылка на владельца
+
+    private List<Tag> tags;
+
+    /**
+     *
+     * @return tags tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    /**
+     *
+     * @param tags tags
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    /**
+     *
+     * @return authorId authorId
+     */
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    /**
+     *
+     * @param authorId authorId
+     */
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
+    }
 
     /**
      * Это функция.

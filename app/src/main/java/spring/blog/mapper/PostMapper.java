@@ -11,6 +11,11 @@ import spring.blog.dto.PostCreateDTO;
 import spring.blog.dto.PostDTO;
 import spring.blog.dto.PostUpdateDTO;
 import spring.blog.model.Post;
+import spring.blog.model.Tag;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -34,12 +39,12 @@ public abstract class PostMapper {
     public abstract Post toEntity(PostCreateDTO dto);
 
     @Mapping(target = "authorId", source = "post", qualifiedByName = "userGetId")
+    @Mapping(target = "tags", source = "post", qualifiedByName = "tagsGet")
     public abstract PostDTO toDTO(Post post);
 
     public abstract void updateEntityFromDTO(PostUpdateDTO dto, @MappingTarget Post model);
 
     /**
-     *
      * @param post
      * @return userId userId
      */
@@ -49,6 +54,17 @@ public abstract class PostMapper {
         return post.getAuthor().getId();
     }
 
+    /**
+     * @param post
+     * @return Tags
+     */
+    @Named("tagsGet")
+    public List<String> tagsGet(Post post) {
+        List<String> result = new ArrayList<>();
+        return post.getTags().stream()
+                .map(Tag::getName)
+                .collect(Collectors.toList());
+    }
 
 }
 

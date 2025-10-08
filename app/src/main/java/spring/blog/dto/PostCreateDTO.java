@@ -23,4 +23,6 @@ public class PostCreateDTO {
 
     private Long authorId; // ссылка на владельца
 
+//    private List<String> tags;
+
 }

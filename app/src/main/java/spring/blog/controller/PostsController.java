@@ -1,6 +1,7 @@
 package spring.blog.controller;
 
 import jakarta.validation.Valid;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
 import spring.blog.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -118,12 +120,8 @@ http post localhost:8080/api/posts title=title03 content=somecontent author=auth
 http post localhost:8080/api/posts title=title04 content=somecontent author=author05 published=true
 http post localhost:8080/api/posts title=title05 content=somecontent author=author05 published=false
 http post localhost:8080/api/posts title=title07 content=somecontent author=author03 published=true
-http post localhost:8080/api/posts title=title08 content=somecontent author=author02 published=true
-http post localhost:8080/api/posts title=title09 content=somecontent author=author02 published=true
-http post localhost:8080/api/posts title=title10 content=somecontent author=author03 published=true
-http post localhost:8080/api/posts title=title01 content=somecontent published=false userId=1
-http post localhost:8080/api/posts title=title01 content=somecontent123456789  published=true
 
+http post localhost:8080/api/posts title=title01 content=somecontent123456789  published=true authorId=1
      */
 
     /**
@@ -135,12 +133,16 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
     @PostMapping("")
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
         var user = userRepository.findById(dto.getAuthorId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Post post = postMapper.toEntity(dto);
         post.setAuthor(user);
-        int i = 1;
         postRepository.save(post);
+        List<String> result = new ArrayList<>();
+//        result = dto.getTags().stream()
+//                .map(Tag::getName)
+//                .collect(Collectors.toList());
+
 //        return ResponseEntity.ok(postMapper.toDTO(post));
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(post));
     }
@@ -158,8 +160,10 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
                                           @Valid @RequestBody PostUpdateDTO dto) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
+        var author = userRepository.findById(dto.getAuthorId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         postMapper.updateEntityFromDTO(dto, post);
+        post.setAuthor(author);
         postRepository.save(post);
 
         return ResponseEntity.ok(postMapper.toDTO(post));
@@ -167,7 +171,6 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
 
 
     /**
-     *
      * @param id
      * @param dto
      * @return ResponseEntity ResponseEntity
@@ -181,7 +184,12 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
         dto.getTitle().ifPresent(post::setTitle);
         dto.getContent().ifPresent(post::setContent);
         dto.getPublished().ifPresent(post::setPublished);
-
+        if (dto.getAuthorId().isPresent()) {
+            JsonNullable<Long> nullableId = JsonNullable.of(dto.getAuthorId().get());
+            var author = userRepository.findById(nullableId.get())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            post.setAuthor(author);
+        }
         postRepository.save(post);
         return ResponseEntity.ok(postMapper.toDTO(post));
     }
