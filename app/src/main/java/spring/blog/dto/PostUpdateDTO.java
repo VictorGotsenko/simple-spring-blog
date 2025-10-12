@@ -19,6 +19,24 @@ public class PostUpdateDTO {
 
     private Long authorId; // ссылка на владельца
 
+    private boolean published;
+
+    /**
+     *
+     * @return isPublished
+     */
+    public boolean isPublished() {
+        return published;
+    }
+
+    /**
+     *
+     * @param published
+     */
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
     private List<Tag> tags;
 
     /**

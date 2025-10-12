@@ -1,5 +1,6 @@
 package spring.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,7 +51,18 @@ public class User extends BaseEntity {
 
     private LocalDate birthday;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    /*
+    Подчиненная связь владельцу (класс Post)
+    Маркируется @OneToMany
+    сопровождается атрибутом mappedBy, указывается имя поля со стороны-владельца
+    (в моём случае author из класса Post).
+    Аннотация @JoinColumn (всё ещё необязательная) перемещается в класс владельца.
+     */
+    @JsonIgnore
+    @OneToMany(mappedBy = "author",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
     @CreatedDate

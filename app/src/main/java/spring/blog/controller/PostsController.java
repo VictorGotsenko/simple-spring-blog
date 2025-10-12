@@ -1,7 +1,7 @@
 package spring.blog.controller;
 
 import jakarta.validation.Valid;
-import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +17,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import spring.blog.dto.PostCreateDTO;
 import spring.blog.dto.PostDTO;
 import spring.blog.dto.PostPatchDTO;
 import spring.blog.dto.PostUpdateDTO;
 import spring.blog.mapper.PostMapper;
-import spring.blog.model.Post;
 import spring.blog.repository.PostRepository;
 import spring.blog.repository.UserRepository;
+import spring.blog.service.PostService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -38,6 +36,10 @@ public class PostsController {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostMapper postMapper;
+
+    @Autowired
+    private PostService postService;
+
 
     public PostsController(PostRepository postRepository,
                            UserRepository userRepository,
@@ -79,11 +81,12 @@ public class PostsController {
     // curl GET 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
     // http get 'localhost:8080/api/posts?page=0&size=3&sort=createdAt,desc'
     @GetMapping("")
-    public List<PostDTO> listPosts() {
-        return postRepository.findAll()
-                .stream()
-                .map(postMapper::toDTO)
-                .toList();
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<PostDTO>> index() {
+        var posts = postService.getAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(posts.size()))
+                .body(posts);
     }
 //    @ResponseStatus(HttpStatus.OK)
 //    public Page<Post> getPublishedPosts(
@@ -96,20 +99,21 @@ public class PostsController {
 //        return postRepository.findByPublishedTrue(pageable);
 //    }
 
-
     /**
-     * Это функция GET id.
+     * Это функция GET Id.
      *
      * @param id id
-     * @return the name of the Post
+     * @return PostDTO
      */
     // {id} - title
     // http get localhost:8080/api/posts/1
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
-        return postRepository.findById(id)
-                .map(post -> ResponseEntity.ok(postMapper.toDTO(post)))
-                .orElse(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<PostDTO> show(@PathVariable Long id) {
+        var post = postService.findById(id);
+        return ResponseEntity.ok()
+//                .header("X-Total-Count", String.valueOf(post.))
+                .body(post);
     }
 
     /* Это создание страницы — здесь возвращается информация о добавленной странице
@@ -131,20 +135,12 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
      * @return the name of the Post
      */
     @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
-        var user = userRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Post post = postMapper.toEntity(dto);
-        post.setAuthor(user);
-        postRepository.save(post);
-        List<String> result = new ArrayList<>();
-//        result = dto.getTags().stream()
-//                .map(Tag::getName)
-//                .collect(Collectors.toList());
-
-//        return ResponseEntity.ok(postMapper.toDTO(post));
-        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(post));
+        var post = postService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+//                .header("X-Total-Count", String.valueOf(post.))
+                .body(post);
     }
 
     /**
@@ -154,44 +150,36 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
      * @param dto data
      * @return the name of the Post
      */
-    //  http put localhost:8080/api/posts/2 title=title011 content=somecontent0555
+    // change whole object Post
+    //  http put localhost:8080/api/posts/2 title=title011 content=somecontent0555  published=true authorId=1
     @PutMapping("/{id}") // Обновление поста
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PostDTO> update(@PathVariable Long id,
                                           @Valid @RequestBody PostUpdateDTO dto) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        var author = userRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        postMapper.updateEntityFromDTO(dto, post);
-        post.setAuthor(author);
-        postRepository.save(post);
-
-        return ResponseEntity.ok(postMapper.toDTO(post));
+        var post = postService.update(dto, id);
+        return ResponseEntity.status(HttpStatus.CREATED)
+//                .header("X-Total-Count", String.valueOf(post.))
+                .body(post);
     }
 
 
     /**
-     * @param id
-     * @param dto
-     * @return ResponseEntity ResponseEntity
+     * Это функция PATCH.
+     *
+     * @param id  id
+     * @param dto data
+     * @return the name of the Post
      */
+    // Change only present fields
+    //  http patch localhost:8080/api/posts/2 title=title_Changed published=true
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PostDTO> patchPost(@PathVariable Long id,
                                              @RequestBody PostPatchDTO dto) {
-        var post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        dto.getTitle().ifPresent(post::setTitle);
-        dto.getContent().ifPresent(post::setContent);
-        dto.getPublished().ifPresent(post::setPublished);
-        if (dto.getAuthorId().isPresent()) {
-            JsonNullable<Long> nullableId = JsonNullable.of(dto.getAuthorId().get());
-            var author = userRepository.findById(nullableId.get())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-            post.setAuthor(author);
-        }
-        postRepository.save(post);
-        return ResponseEntity.ok(postMapper.toDTO(post));
+        var post = postService.patchPost(dto, id);
+        return ResponseEntity.status(HttpStatus.CREATED)
+//                .header("X-Total-Count", String.valueOf(post.))
+                .body(post);
     }
 
     /**
@@ -203,6 +191,6 @@ http post localhost:8080/api/posts title=title01 content=somecontent123456789  p
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
-        postRepository.deleteById(id);
+        postService.delete(id);
     }
 }

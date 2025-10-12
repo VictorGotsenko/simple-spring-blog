@@ -76,12 +76,12 @@ class PostControllerTest {
     @Test
     public void testCreatePost() throws Exception {
 
+//http post localhost:8080/api/posts title=title01 content=somecontent123456789  published=true authorId=1
         var data = new HashMap<>();
-        data.put("title", faker.book().title());
-        data.put("content", faker.lorem().sentence(1));
+        data.put("title", "title01");
+        data.put("content", "somecontent123456789");
         data.put("published", false);
         data.put("authorId", testUser.getId());
-
 
         var request = post("/api/posts") //posts"
                 .contentType(MediaType.APPLICATION_JSON)
@@ -136,8 +136,8 @@ class PostControllerTest {
         var data = new HashMap<>();
         data.put("title", "MyTitle");
         data.put("content", "Mycontent123456789");
-        data.put("published", testPost.isPublished());
-        data.put("authorId", testPost.getAuthor().getId());
+        data.put("published", false);
+        data.put("authorId", testUser.getId());
 
 
         var request = put("/api/posts/" + testPost.getId())
@@ -146,7 +146,7 @@ class PostControllerTest {
                 .content(om.writeValueAsString(data));
 
         mockMvc.perform(request)
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         testPost = postRepository.findById(testPost.getId()).get();
         assertThat(testPost.getTitle()).isEqualTo(("MyTitle"));

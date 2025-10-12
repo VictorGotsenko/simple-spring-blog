@@ -1,5 +1,6 @@
 package spring.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,12 +45,25 @@ public class Post extends BaseEntity {
 
     private boolean published;
 
+    /*
+    Владелец обозначается отношением аннотацией @ManyToOne
+    («много постов к одному user`у» – всё логично)
+    над полем типа User.
+    То есть поле должно быть объектом класса,
+    которым «владеет» в этих отношениях наша главная сторона.
+     */
+    @JsonIgnore
     @ManyToOne                     //(fetch = FetchType.LAZY)
+    //@JoinColumn подсказывает Hibernate, с какой конкретно колонкой в таблице БД связано это поле
     @JoinColumn(name = "author_id")
     @NotNull
     private User author;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @OneToMany(mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<Tag> tags = new ArrayList<>();
 
     @CreatedDate
