@@ -44,11 +44,20 @@ public class ModelGenerator {
      */
     @PostConstruct
     public void generateData() {
+        if (!userRepository.findByEmail("AnTest@hotmail.com").isPresent()) {
+            User userPass = new User();
+            userPass.setFirstName(faker.name().firstName());
+            userPass.setLastName(faker.name().lastName());
+            userPass.setEmail("AnTest@hotmail.com");
+            userPass.setPasswordDigest("$2a$10$CliAMk9j4efmEVQfcgFkZO2fwr9HqQByUlyCA4SH.b.QPmqq5k9Tu");
+            userRepository.save(userPass);
+        }
         for (int i = 0; i < 5; i++) {
             User user = new User();
             user.setFirstName(faker.name().firstName());
             user.setLastName(faker.name().lastName());
             user.setEmail(faker.internet().emailAddress());
+            user.setPasswordDigest("123");
             userRepository.save(user);
 
             Post post = new Post();
@@ -61,10 +70,10 @@ public class ModelGenerator {
             user.setPosts(List.of(post));
             userRepository.save(user);
 
-
             Tag tag1 = new Tag();
             tag1.setName(faker.gameOfThrones().house());
             tag1.setPost(post);
+
             Tag tag2 = new Tag();
             tag2.setName(faker.gameOfThrones().house());
             tag2.setPost(post);
@@ -73,8 +82,8 @@ public class ModelGenerator {
 
             post.setTags(List.of(tag1, tag2));
             postRepository.save(post);
-//            int k = 1;
 
+            System.out.println("Login: " + user.getEmail());
 //            System.out.println("Id: " + post.getId());
 //            System.out.println("Title: " + post.getTitle());
 //            System.out.println("User Id: " + post.getAuthor().getId());

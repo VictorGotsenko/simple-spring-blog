@@ -21,6 +21,7 @@ public class WelcomeController {
      * @return welcomeMessage
      * @author Имя автора
      * @version 1.0
+     * localhost:8080/welcome
      */
     @GetMapping("/welcome")
     public String welcome() {

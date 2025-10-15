@@ -62,11 +62,12 @@ public class PostService {
      * @return PostDTO
      */
     public PostDTO create(PostCreateDTO postData) {
-        var user = userRepository.findById(postData.getAuthorId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Post post = postMapper.toEntity(postData);
-        post.setAuthor(user);
+//        var user = userRepository.findById(postData.getAuthorId())
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+//
+//        Post post = postMapper.toEntity(postData);
+//        post.setAuthor(user);
+        var post = postMapper.toEntity(postData);
         postRepository.save(post);
         return postMapper.toDTO(post);
     }
@@ -79,10 +80,13 @@ public class PostService {
     public PostDTO update(PostUpdateDTO postData, Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        var author = userRepository.findById(postData.getAuthorId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+//        var author = userRepository.findById(postData.getAuthorId())
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+//        postMapper.updateEntityFromDTO(postData, post);
+//        post.setAuthor(author);
+
         postMapper.updateEntityFromDTO(postData, post);
-        post.setAuthor(author);
+
         postRepository.save(post);
 
         return postMapper.toDTO(post);

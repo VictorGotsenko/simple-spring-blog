@@ -1,4 +1,4 @@
-package spring.blog.controller;
+package spring.blog.controller.api;
 
 
 import jakarta.validation.Valid;

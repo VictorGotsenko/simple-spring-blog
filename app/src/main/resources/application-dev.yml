@@ -1,0 +1,17 @@
+spring:
+#profiles: development
+  datasource:
+    #url: jdbc:h2:file:./data/devdb;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1 # work
+    url: jdbc:h2:file:./data/devdb;DB_CLOSE_ON_EXIT=FALSE #;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver   # общий драйвер (будет переопределен для prod)
+    #url: jdbc:h2:~/test # работает
+    #url: jdbc:h2:file:~/test #работает
+    #url: jdbc:h2:file:~/test;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    #url: jdbc:h2:file:~/test;DB_CLOSE_DELAY=-1 #работает, но перед повторным пуском надо в ручную удалять файл
+    username: sa
+    password:
+
+jpa:
+  hibernate:
+  ddl-auto: update
+  database-platform: org.hibernate.dialect.H2Dialectue

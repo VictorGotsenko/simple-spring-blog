@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
  */
 
 public abstract class PostMapper {
+
+    @Mapping(target = "author.id", source = "authorId")
     public abstract Post toEntity(PostCreateDTO dto);
 
     @Mapping(target = "authorId", source = "post", qualifiedByName = "userGetId")
