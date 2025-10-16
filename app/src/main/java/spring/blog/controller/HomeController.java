@@ -1,5 +1,6 @@
 package spring.blog.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +32,8 @@ public class HomeController {
      * localhost:8080/
      */
     //у блога есть отдельная страница «О проекте». less 03
-    @GetMapping("/about")
-    public String about() {
-        return "This is simple Spring blog!";
-    }
+//    @GetMapping("/about")
+//    public String about() {
+//        return "about";
+//    }
 }
